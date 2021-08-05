@@ -595,6 +595,7 @@ namespace AutoClicker
             clicker.setTargetDelay(targetTime, GetNistTime());
             btnToggle_Click(null, null);
         }
+
         private DateTime GetNistTime()
         {
             var myHttpWebRequest = (HttpWebRequest)WebRequest.Create(txtURL.Text);
