@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+
 
 namespace AutoClicker
 {
@@ -40,10 +45,12 @@ namespace AutoClicker
         public enum DelayType
         {
             Fixed,
-            Range
+            Range,
+            Set
         }
 
         private DelayType delayType;
+        public bool delaySet;
         private int delay;
         private int delayRange;
         #endregion
@@ -79,6 +86,8 @@ namespace AutoClicker
         private bool countUpdated;
         private CountType tmpCountType;
         private int tmpCount;
+
+        private int TargetDelay;
         #endregion
 
         Thread Clicker;
@@ -87,6 +96,7 @@ namespace AutoClicker
         public AutoClicker()
         {
             rnd = new Random();
+            delaySet = false;
         }
 
         public class NextClickEventArgs : EventArgs
@@ -247,9 +257,15 @@ namespace AutoClicker
                     nextDelay = delay;
                     
                 }
-                else
+                else if (delayType == DelayType.Range)
                 {
                     nextDelay = rnd.Next(delay, delayRange);
+                }
+                if (delaySet)
+                {
+                    nextDelay = TargetDelay;
+                    delaySet = false;
+                    //nextDelay = 1000;
                 }
                 NextClick?.Invoke(this, new NextClickEventArgs { NextClick = nextDelay });
                 Thread.Sleep(nextDelay);
@@ -360,6 +376,18 @@ namespace AutoClicker
             tmpCount = Count;
 
             countUpdated = true;
+        }
+
+        public void setDelayTypeToSet()
+        {
+            delayType = DelayType.Set;
+        }
+
+        public void setTargetDelay(DateTime targetTime, DateTime serverNow)
+        {
+            TimeSpan span = targetTime.Subtract(serverNow);
+            TargetDelay = (int)span.TotalMilliseconds;
+            TargetDelay++;
         }
     }
 }

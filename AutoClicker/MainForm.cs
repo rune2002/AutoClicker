@@ -2,6 +2,8 @@
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using System.Net;
+using System.Globalization;
 
 namespace AutoClicker
 {
@@ -394,7 +396,6 @@ namespace AutoClicker
                 numDelayRangeMax.Enabled = true;
                 numDelayRangeMin.Enabled = true;
             }
-
             clicker.UpdateDelay(delayType, delay, delayRange);
         }
 
@@ -582,6 +583,27 @@ namespace AutoClicker
         {
             var form = new SelectionForm(this);
             form.Show();
+        }
+
+        private void btnSync_Click(object sender, EventArgs e)
+        {
+            clicker.delaySet = true;
+            //labelNow.Text = DateTime.Now.ToString();
+            labelNow.Text = GetNistTime().ToString();
+
+            DateTime targetTime = DateTime.Parse(txtTarget.Text);
+            clicker.setTargetDelay(targetTime, GetNistTime());
+            btnToggle_Click(null, null);
+        }
+        private DateTime GetNistTime()
+        {
+            var myHttpWebRequest = (HttpWebRequest)WebRequest.Create(txtURL.Text);
+            var response = myHttpWebRequest.GetResponse();
+            string todaysDates = response.Headers["date"];
+            return DateTime.ParseExact(todaysDates,
+                                       "ddd, dd MMM yyyy HH:mm:ss 'GMT'",
+                                       CultureInfo.InvariantCulture.DateTimeFormat,
+                                       DateTimeStyles.AssumeUniversal);
         }
     }
 }
